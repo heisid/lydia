@@ -6,10 +6,11 @@ with some minor adjustments
 import sqlite3
 from datetime import datetime
 import ollama
+from pydantic.v1.config import get_config
 
 from utilities import get_config
 
-DB_PATH = "./lt_memory.db"
+DB_PATH = get_config("DB_PATH","./lt_memory.db")
 
 def init_db(db_path=DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
@@ -108,7 +109,7 @@ def upsert_fact(conn: sqlite3.Connection, key: str, value: str):
 def summarize_session(conn: sqlite3.Connection, session_id: str,
                       model: str|None) -> str | None:
     if model is None:
-        model = get_config("MODEL")
+        model = get_config("MODEL", "gemma4")
     turns = conn.execute(
         "SELECT role, content FROM conversations "
         "WHERE session_id = ? ORDER BY id",

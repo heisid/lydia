@@ -25,7 +25,7 @@ AVAILABLE_TOOLS = {
 class Lydia:
     def __init__(self, session_id: str = None, model: str|None = None,
                  db_path: Path|None = None) -> None:
-        self.model = model if model is not None else get_config("MODEL")
+        self.model = model if model is not None else get_config("MODEL", "gemma4")
         db_path = db_path if db_path is not None else DB_PATH
         self.session_id = session_id or str(uuid.uuid4())
         self.conn = init_db(db_path)

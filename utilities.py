@@ -17,9 +17,9 @@ def _create_dotenv():
         shutil.copy(template_path, dotenv_path)
         load_dotenv(dotenv_path=dotenv_path)
 
-def get_config(key: str) -> str | None:
+def get_config(key: str, default: str) -> str:
     _create_dotenv()
-    return os.getenv(key)
+    return os.getenv(key, default)
 
 class ToolResponse(BaseModel):
     status: str
