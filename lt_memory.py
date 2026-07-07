@@ -46,7 +46,6 @@ def init_db(db_path=DB_PATH) -> sqlite3.Connection:
 
 def save_turn(conn: sqlite3.Connection, session_id: str,
               role: str, content: str):
-    """Save a single conversation turn."""
     conn.execute(
         "INSERT INTO conversations (session_id, role, content, timestamp, tokens_est) "
         "VALUES (?, ?, ?, ?, ?)",
@@ -58,7 +57,6 @@ def save_turn(conn: sqlite3.Connection, session_id: str,
 
 def get_recent_turns(conn: sqlite3.Connection, session_id: str,
                      limit: int = 20) -> list[dict]:
-    """Fetch recent turns for the current session."""
     rows = conn.execute(
         "SELECT role, content, timestamp FROM conversations "
         "WHERE session_id = ? ORDER BY id DESC LIMIT ?",
@@ -71,13 +69,7 @@ def get_recent_turns(conn: sqlite3.Connection, session_id: str,
 def get_memory_context(conn: sqlite3.Connection,
                        current_session: str,
                        max_summaries: int = 3) -> str:
-    """
-    Build a memory context block to inject before each response.
-    Includes: key facts + recent session summaries.
-    """
     sections = []
-
-    # 1. Key facts (things explicitly remembered)
     facts = conn.execute(
         "SELECT key, value FROM facts ORDER BY updated_at DESC LIMIT 20"
     ).fetchall()
@@ -86,7 +78,6 @@ def get_memory_context(conn: sqlite3.Connection,
         facts_text = "\n".join(f"- {r['key']}: {r['value']}" for r in facts)
         sections.append(f"KNOWN FACTS ABOUT THE USER:\n{facts_text}")
 
-    # 2. Summaries from past sessions (not current)
     summaries = conn.execute(
         "SELECT session_id, summary, created_at FROM summaries "
         "WHERE session_id != ? ORDER BY created_at DESC LIMIT ?",
@@ -107,7 +98,6 @@ def get_memory_context(conn: sqlite3.Connection,
 
 
 def upsert_fact(conn: sqlite3.Connection, key: str, value: str):
-    """Store or update a key fact the agent has learned."""
     conn.execute(
         "INSERT INTO facts (key, value, updated_at) VALUES (?, ?, ?) "
         "ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
@@ -117,10 +107,6 @@ def upsert_fact(conn: sqlite3.Connection, key: str, value: str):
 
 def summarize_session(conn: sqlite3.Connection, session_id: str,
                       model: str|None) -> str | None:
-    """
-    Summarize a completed session and store it.
-    Returns summary text or None if nothing to summarize.
-    """
     if model is None:
         model = get_config("MODEL")
     turns = conn.execute(
@@ -130,9 +116,8 @@ def summarize_session(conn: sqlite3.Connection, session_id: str,
     ).fetchall()
 
     if len(turns) < 4:
-        return None  # Too short to summarize
+        return None
 
-    # Format conversation for summarization
     convo = "\n".join(f"{r['role'].upper()}: {r['content']}" for r in turns)
 
     prompt = f"""Summarize this conversation concisely. Focus on:
