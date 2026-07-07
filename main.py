@@ -87,8 +87,6 @@ if __name__ == "__main__":
     session_id = sys.argv[1] if len(sys.argv) > 1 else None
 
     lydia = Lydia(session_id=session_id)
-    print("Memory ready. Type 'quit' to end, 'remember KEY=VALUE' to store facts.\n")
-
     try:
         while True:
             user_input = input("Me: ").strip()
