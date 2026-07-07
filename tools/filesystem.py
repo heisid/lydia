@@ -1,19 +1,29 @@
 import os
+from utilities import ToolResponse
 
-def list_directory_content(path: str) -> list|str:
+
+def list_directory_content(path: str) -> ToolResponse:
     """Returns the contents of a directory"""
     """
     Args:
       path: Directory path (string), absolute or relative
     Returns:
-      List the contents of a directory (list) or error message
+      List the contents of a directory (list)
     """
+    response = ToolResponse(
+        status='success',
+        message='',
+        data=''
+    )
     try:
-        return os.listdir(path)
+        response.data = str(os.listdir(path))
+        return response
     except Exception as e:
-        return repr(e)
+        response.status = 'error'
+        response.message = repr(e)
+        return response
 
-def get_current_directory() -> str:
+def get_current_directory() -> ToolResponse:
     """Returns current directory"""
     """
     Args:
@@ -21,21 +31,33 @@ def get_current_directory() -> str:
     Returns:
       Current directory (string)
     """
-    return os.getcwd()
+    return ToolResponse(
+        status='success',
+        message='',
+        data=os.getcwd()
+    )
 
-def is_file(path: str) -> bool|str:
+def is_file(path: str) -> ToolResponse:
     """Check if a path is a file"""
     """
     Args:
       path. Path to the file (string)
     Returns:
-      Current directory (string) or error message
+      Current directory (string)
     """
+    response = ToolResponse(
+        status='success',
+        message='',
+        data=''
+    )
     if not os.path.exists(path):
-        return 'Path not found'
-    return os.path.isfile(path)
+        response.status = 'error'
+        response.message = 'Path not found'
+    else:
+        response.data = str(os.path.isfile(path))
+    return response
 
-def get_file_size(path: str) -> int|str:
+def get_file_size(path: str) -> ToolResponse:
     """Get file size in bytes"""
     """
     Args:
@@ -43,21 +65,39 @@ def get_file_size(path: str) -> int|str:
     Returns:
       File size in bytes (integer) or error message
     """
+    response = ToolResponse(
+        status='success',
+        message='',
+        data=''
+    )
     if not os.path.exists(path):
-        return 'Path not found'
-    return os.path.getsize(path)
+        response.status = 'error'
+        response.message = 'Path not found'
+    else:
+        response.data = str(os.path.getsize(path))
+    return response
 
-def read_file(path: str) -> str|None:
+def read_file(path: str) -> ToolResponse:
     """Read a file"""
     """
     Args:
       path. Path to the file (string)
     Returns:
-      File content (string) or None if file not found
+      File content (string)
     """
+    response = ToolResponse(
+        status='success',
+        message='',
+        data=''
+    )
     try:
         with open(path, 'r') as f:
-            return f.read()
+            response.data = f.read()
+        return response
+    except Exception as e:
+        response.status = 'error'
+        response.message = repr(e)
+        return response
     finally:
         f.close()
 

@@ -5,6 +5,7 @@ from lt_memory import *
 from tools.calculator import CALCULATOR_TOOLS
 from tools.extras import EXTRA_TOOLS
 from tools.filesystem import FILESYSTEM_TOOLS
+from utilities import ToolResponse
 
 SYSTEM_PROMPT = """Your name is Lydia. Named after Skyrim character
 who swore to carry the burdens.
@@ -57,8 +58,8 @@ class Lydia:
             if response.message.tool_calls:
                 for tc in response.message.tool_calls:
                     if tc.function.name in AVAILABLE_TOOLS:
-                        result = AVAILABLE_TOOLS[tc.function.name](**tc.function.arguments)
-                        messages.append({'role': 'tool', 'tool_name': tc.function.name, 'content': str(result)})
+                        result: ToolResponse = AVAILABLE_TOOLS[tc.function.name](**tc.function.arguments)
+                        messages.append({'role': 'tool', 'tool_name': tc.function.name, 'content': result.model_dump_json(indent=2)})
             else:
                 break
 
