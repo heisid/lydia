@@ -62,7 +62,7 @@ def get_recent_turns(conn: sqlite3.Connection, session_id: str,
                      limit: int = 20) -> list[dict]:
     rows = conn.execute(
         "SELECT role, content, timestamp FROM conversations "
-        "WHERE session_id = ? ORDER BY id DESC LIMIT ?",
+        "WHERE session_id = ? AND role IN ('user', 'assistant') ORDER BY id DESC LIMIT ?",
         (session_id, limit)
     ).fetchall()
     return [dict(r) for r in reversed(rows)]

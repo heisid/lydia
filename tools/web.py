@@ -1,3 +1,5 @@
+from html2text import html2text
+
 from utilities import ToolResponse
 import requests
 
@@ -34,7 +36,7 @@ def goto_url(url: str) -> ToolResponse:
     Args:
        url: URL to visit (string)
     Returns:
-      raw HTTP GET response from url (string)
+      HTTP GET response from url, reformatted to markdown (string)
     """
     response = ToolResponse(
         status='success',
@@ -43,7 +45,7 @@ def goto_url(url: str) -> ToolResponse:
     )
     try:
         r = requests.get(url, headers=HEADERS)
-        response.data = r.text
+        response.data = html2text(r.text)
         return response
     except Exception as e:
         response.status = 'error'
