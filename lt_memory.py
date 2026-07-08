@@ -111,7 +111,7 @@ def upsert_fact(conn: sqlite3.Connection, key: str, value: str):
 def summarize_session(conn: sqlite3.Connection, session_id: str,
                       model: str|None) -> str | None:
     if model is None:
-        model = get_config("MODEL", "gemma4")
+        model = get_config('MODEL', 'qwen3.5')
     turns = conn.execute(
         "SELECT role, content FROM conversations "
         "WHERE session_id = ? ORDER BY id",
