@@ -113,14 +113,12 @@ def summarize_session(conn: sqlite3.Connection, session_id: str,
     if model is None:
         model = get_config("MODEL", "gemma4")
     turns = conn.execute(
-        "SELECT role, content, tokens_est FROM conversations "
+        "SELECT role, content FROM conversations "
         "WHERE session_id = ? ORDER BY id",
         (session_id,)
     ).fetchall()
-    total_tokens = sum([int(t['tokens_est']) for t in turns])
-    print(f'total tokens: {total_tokens}')
 
-    if len(turns) < 4 and total_tokens < 100:
+    if len(turns) < 4:
         return None
 
     convo = "\n".join(f"{r['role'].upper()}: {r['content']}" for r in turns)
