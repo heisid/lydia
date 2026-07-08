@@ -2,6 +2,10 @@ from utilities import ToolResponse
 import requests
 
 
+HEADERS = {
+    'User-Agent': 'MeongOrenBot/1.0 (+https://kucing-oren.com/)'
+}
+
 def web_search(search_term: str) -> ToolResponse:
     """Search on the internet (search.kucing-oren.com)"""
     """
@@ -28,7 +32,7 @@ def goto_url(url: str) -> ToolResponse:
     """Visit any URL"""
     """
     Args:
-       url (string)
+       url: URL to visit (string)
     Returns:
       raw HTTP GET response from url (string)
     """
@@ -38,7 +42,7 @@ def goto_url(url: str) -> ToolResponse:
         data=''
     )
     try:
-        r = requests.get(url)
+        r = requests.get(url, headers=HEADERS)
         response.data = r.text
         return response
     except Exception as e:

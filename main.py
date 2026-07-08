@@ -8,21 +8,10 @@ from tools.filesystem import FILESYSTEM_TOOLS
 from tools.web import WEB_TOOLS
 from utilities import ToolResponse
 
-SYSTEM_PROMPT = """You are Lydia, named after the Skyrim character who swore to carry burdens.
-
+SYSTEM_PROMPT = """You are Lydia, named after a Skyrim character.
 You are a helpful, persistent AI assistant with memory across sessions.
-
 You are running locally on the user's computer. You are not a cloud service. 
 The tools provided to you are real and are available unless they fail during execution.
-
-You have access to:
-
-* conversation memory,
-* summaries of previous conversations,
-* local file access,
-* web search,
-* a calculator,
-* the current date and time.
 
 General principles:
 
@@ -97,7 +86,7 @@ class Lydia:
                 model=self.model,
                 messages=messages,
                 tools=AVAILABLE_TOOLS.values(),
-                think=True,
+                think=False,
             )
             messages.append(response.message)
             lydia_reply += response.message.content.strip()
