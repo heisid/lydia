@@ -17,13 +17,14 @@ def init_db(db_path=DB_PATH) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS conversations (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id  TEXT NOT NULL,
-            role        TEXT NOT NULL,
-            tool_name   TEXT NOT NULL,
-            content     TEXT NOT NULL,
-            timestamp   TEXT NOT NULL,
-            tokens_est  INTEGER DEFAULT 0
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id      TEXT NOT NULL,
+            role            TEXT NOT NULL,
+            tool_name       TEXT,
+            tool_arguments  TEXT,
+            content         TEXT NOT NULL,
+            timestamp       TEXT NOT NULL,
+            tokens_est      INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS summaries (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,11 +48,11 @@ def init_db(db_path=DB_PATH) -> sqlite3.Connection:
     return conn
 
 def save_turn(conn: sqlite3.Connection, session_id: str,
-              role: str, content: str, tool_name: str=''):
+              role: str, content: str, tool_name: str='', tool_arguments: str=''):
     conn.execute(
-        "INSERT INTO conversations (session_id, role, tool_name, content, timestamp, tokens_est) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (session_id, role, tool_name, content, datetime.utcnow().isoformat(),
+        "INSERT INTO conversations (session_id, role, tool_name, tool_arguments, content, timestamp, tokens_est) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (session_id, role, tool_name, tool_arguments, content, datetime.utcnow().isoformat(),
          len(content.split()))
     )
     conn.commit()
@@ -112,12 +113,14 @@ def summarize_session(conn: sqlite3.Connection, session_id: str,
     if model is None:
         model = get_config("MODEL", "gemma4")
     turns = conn.execute(
-        "SELECT role, content FROM conversations "
-        "WHERE session_id = ? AND role IN ('user', 'assistant') ORDER BY id",
+        "SELECT role, content, tokens_est FROM conversations "
+        "WHERE session_id = ? ORDER BY id",
         (session_id,)
     ).fetchall()
+    total_tokens = sum([int(t['tokens_est']) for t in turns])
+    print(f'total tokens: {total_tokens}')
 
-    if len(turns) < 4:
+    if len(turns) < 4 and total_tokens < 100:
         return None
 
     convo = "\n".join(f"{r['role'].upper()}: {r['content']}" for r in turns)

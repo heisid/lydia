@@ -106,7 +106,7 @@ class Lydia:
                     if tc.function.name in AVAILABLE_TOOLS:
                         result: ToolResponse = AVAILABLE_TOOLS[tc.function.name](**tc.function.arguments)
                         messages.append({'role': 'tool', 'tool_name': tc.function.name, 'content': result.model_dump_json(indent=2)})
-                        save_turn(self.conn, self.session_id, "tool", result.model_dump_json(), tc.function.name)
+                        save_turn(self.conn, self.session_id, "tool", result.model_dump_json(), tc.function.name, str(tc.function.arguments))
             else:
                 break
 
